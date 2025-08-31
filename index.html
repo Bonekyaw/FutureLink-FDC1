@@ -20,9 +20,9 @@
           <ul>
             <li><a href="#">Home</a></li>
             <li><a href="#">About</a></li>
-            <li>
-              <a href="#">Categories</a>
-              <div class="dropdown-content">
+            <li class="dropdown">
+              <a href="#" id="dropdown-toggle">Categories</a>
+              <div class="dropdown-content" id="dropdown-menu">
                 <a href="#">JavaScript</a><a href="#">CSS</a
                 ><a href="#">Web Design</a><a href="#">Tutorials</a>
               </div>
@@ -30,6 +30,11 @@
             <li><a href="#">Contact</a></li>
           </ul>
         </nav>
+        <button class="burger-menu" id="burger-menu">
+          <div class="line"></div>
+          <div class="line"></div>
+          <div class="line"></div>
+        </button>
       </div>
     </header>
     <main>
@@ -83,16 +88,37 @@
         </div>
       </section>
     </main>
-    <footer>
+    <footer class="main-footer">
       <div class="container">
         <h4>Subscribe to Our Newsletter</h4>
         <p>Get the latest tech tips and tutorials delivered to your inbox.</p>
-        <form>
-          <input type="email" />
+        <form class="subscribe-form" id="subscribe-form">
+          <input
+            type="email"
+            id="email-input"
+            placeholder="Enter your email"
+            required
+          />
           <button type="submit">Subscribe</button>
         </form>
-        <div>&copy; 2025 TechInsights. All Rights Reserved.</div>
+        <div class="form-message" id="form-message"></div>
+        <div class="copyright">
+          &copy; 2025 TechInsights. All Rights Reserved.
+        </div>
       </div>
     </footer>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const dropdownToggle = document.getElementById("dropdown-toggle");
+        const dropdownMenu = document.getElementById("dropdown-menu");
+
+        dropdownToggle.addEventListener("click", function (event) {
+          event.preventDefault();
+          event.stopPropagation();
+
+          dropdownMenu.classList.toggle("show");
+        });
+      });
+    </script>
   </body>
 </html>
