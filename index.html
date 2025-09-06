@@ -16,7 +16,7 @@
     <header class="main-header">
       <div class="container">
         <a class="logo" href="#">TechInsights</a>
-        <nav class="main-nav">
+        <nav class="main-nav" id="main-nav">
           <ul>
             <li><a href="#">Home</a></li>
             <li><a href="#">About</a></li>
@@ -109,6 +109,7 @@
     </footer>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
+        // Dropdown Menu Logic
         const dropdownToggle = document.getElementById("dropdown-toggle");
         const dropdownMenu = document.getElementById("dropdown-menu");
 
@@ -118,6 +119,24 @@
 
           dropdownMenu.classList.toggle("show");
         });
+
+        // Burger Menu Logic
+        const burgerMenu = document.getElementById("burger-menu");
+        const mainNav = document.getElementById("main-nav");
+
+        burgerMenu.addEventListener("click", function () {
+          mainNav.classList.toggle("mobile-nav-open");
+        });
+
+        // Close Menu on Window Click
+        // window.addEventListener("click", function (event) {
+        //   if (
+        //     !dropdownToggle.contains(event.target) &&
+        //     dropdownMenu.classList.contains("show")
+        //   )
+        //     dropdownMenu.classList.remove("show");
+        //
+        // });
       });
     </script>
   </body>
