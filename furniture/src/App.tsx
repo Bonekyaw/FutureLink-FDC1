@@ -1,45 +1,30 @@
 import { useState } from "react";
-import "./App.css";
-// JSX
-
-const header = <h1>I'm Header!!</h1>;
-
-interface TitleProps {
-  title: string;
-  body?: string;
-}
-
-function Title({ title, body = "I'm body" }: TitleProps) {
-  return (
-    <>
-      <p>{title}</p>
-      <div>{body}</div>
-    </>
-  );
-}
+import { CircleFadingPlus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 function App() {
   const [count, setCount] = useState(0);
+  const title = "Hello World";
 
   return (
     <>
-      {header}
-      <Title title="Fullstack Developer" />
-      <Title title="Node JS Developer" body="Still learning" />
-      <h1 style={{ color: "white", backgroundColor: "blue" }}>
-        Hello FutureLink
-      </h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <h1>Counter App : {title}</h1>
+      <h3>Count: {count}</h3>
+      <Button
+        className="bg-blue-500 hover:bg-amber-500"
+        onClick={() => {
+          setCount((prev) => prev + 1);
+        }}
+      >
+        Increase <CircleFadingPlus />
+      </Button>
+      <Button
+        onClick={() => {
+          setCount(count - 1);
+        }}
+      >
+        Decrease -
+      </Button>
     </>
   );
 }
