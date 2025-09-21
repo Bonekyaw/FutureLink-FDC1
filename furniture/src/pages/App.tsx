@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { CircleFadingPlus } from "lucide-react";
+import { Link } from "react-router";
+
 import { Button } from "@/components/ui/button";
 
 function App() {
@@ -8,6 +10,7 @@ function App() {
 
   return (
     <>
+      <Link to="/login">Go to Login</Link>
       <h1>Counter App : {title}</h1>
       <h3>Count: {count}</h3>
       <Button
