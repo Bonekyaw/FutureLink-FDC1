@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Link, useNavigate, useNavigation } from "react-router";
+import { Link, useNavigate } from "react-router";
 
 import {
   Form,
@@ -37,7 +37,6 @@ export function LoginForm({
   ...props
 }: React.ComponentProps<"div">) {
   const navigate = useNavigate();
-  const navigation = useNavigation();
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -47,7 +46,8 @@ export function LoginForm({
     },
   });
 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
+  async function onSubmit(data: z.infer<typeof FormSchema>) {
+    await new Promise((resolve) => setTimeout(resolve, 2000));
     console.log(data);
     navigate("/");
   }
@@ -122,10 +122,12 @@ export function LoginForm({
                       </FormItem>
                     )}
                   />
-                  <Button type="submit" className="w-full">
-                    {navigation.state === "submitting"
-                      ? "Logging in..."
-                      : "Login"}
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={form.formState.isSubmitting}
+                  >
+                    {form.formState.isSubmitting ? "Logging in..." : "Login"}
                   </Button>
                 </form>
               </Form>
