@@ -1,49 +1,135 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { Link, useNavigate, useNavigation } from "react-router";
+
+import {
+  Form,
+  FormControl,
+  // FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+
+const FormSchema = z.object({
+  phone: z
+    .string()
+    .min(7, {
+      message: "Phone number is too short.",
+    })
+    .max(12, { message: "Phone number is too long." })
+    .regex(/^\d+$/, { message: "Phone number must be numeric." }),
+  password: z
+    .string()
+    .min(8, { message: "Password must be 8 digits." })
+    .max(8, { message: "Password must be 8 digits." })
+    .regex(/^\d+$/, { message: "Password must be numeric." }),
+});
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const navigate = useNavigate();
+  const navigation = useNavigation();
+
+  const form = useForm<z.infer<typeof FormSchema>>({
+    resolver: zodResolver(FormSchema),
+    defaultValues: {
+      phone: "",
+      password: "",
+    },
+  });
+
+  function onSubmit(data: z.infer<typeof FormSchema>) {
+    console.log(data);
+    navigate("/");
+  }
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="overflow-hidden p-0">
         <CardContent className="grid p-0 md:grid-cols-2">
-          <form className="p-6 md:p-8">
+          <div className="p-6 md:p-8">
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-center text-center">
                 <h1 className="text-2xl font-bold">Welcome back</h1>
                 <p className="text-muted-foreground text-balance">
-                  Login to your Acme Inc account
+                  Login to Furniture Store
                 </p>
               </div>
-              <div className="grid gap-3">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  required
-                />
-              </div>
-              <div className="grid gap-3">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
-                  <a
-                    href="#"
-                    className="ml-auto text-sm underline-offset-2 hover:underline"
-                  >
-                    Forgot your password?
-                  </a>
-                </div>
-                <Input id="password" type="password" required />
-              </div>
-              <Button type="submit" className="w-full">
-                Login
-              </Button>
+
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-6"
+                  autoComplete="off"
+                >
+                  <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Phone Number</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="0977*******"
+                            type="tel"
+                            inputMode="numeric"
+                            required
+                            {...field}
+                          />
+                        </FormControl>
+                        {/* <FormDescription>
+                          This is your public display name.
+                        </FormDescription> */}
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <div className="flex items-center">
+                          <FormLabel>Password</FormLabel>
+                          <Link
+                            to="#"
+                            className="ml-auto text-sm underline-offset-2 hover:underline"
+                          >
+                            Forgot your password?
+                          </Link>
+                        </div>
+                        <FormControl>
+                          <Input
+                            type="password"
+                            inputMode="numeric"
+                            required
+                            {...field}
+                          />
+                        </FormControl>
+                        {/* <FormDescription>
+                          This is your public display name.
+                        </FormDescription> */}
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button type="submit" className="w-full">
+                    {navigation.state === "submitting"
+                      ? "Logging in..."
+                      : "Login"}
+                  </Button>
+                </form>
+              </Form>
+
               <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
                 <span className="bg-card text-muted-foreground relative z-10 px-2">
                   Or continue with
@@ -85,10 +171,10 @@ export function LoginForm({
                 </a>
               </div>
             </div>
-          </form>
+          </div>
           <div className="bg-muted relative hidden md:block">
             <img
-              src="/placeholder.svg"
+              src="/house.webp"
               alt="Image"
               className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
             />
