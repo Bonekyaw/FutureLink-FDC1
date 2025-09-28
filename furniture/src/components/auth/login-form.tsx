@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import PasswordInput from "./password-input";
 
 const FormSchema = z.object({
   phone: z
@@ -108,8 +109,7 @@ export function LoginForm({
                           </Link>
                         </div>
                         <FormControl>
-                          <Input
-                            type="password"
+                          <PasswordInput
                             inputMode="numeric"
                             required
                             {...field}
@@ -168,9 +168,9 @@ export function LoginForm({
               </div>
               <div className="text-center text-sm">
                 Don&apos;t have an account?{" "}
-                <a href="#" className="underline underline-offset-4">
+                <Link to="/register" className="underline underline-offset-4">
                   Sign up
-                </a>
+                </Link>
               </div>
             </div>
           </div>
