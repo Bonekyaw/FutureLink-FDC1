@@ -1,0 +1,6 @@
+1. npm init -y
+2. npm i express dotenv cors helmet morgan jest-config
+3. npm i typescript ts-node nodemon @types/node --save-dev
+4. npm i @types/express @types/cors @types/morgan --save-dev
+5. npx tsc --init
+6. 
