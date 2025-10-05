@@ -1,13 +1,15 @@
 import express from "express";
 
+import router from "./routes";
+
 const app = express();
 
-app.get("/", (req, res) => {
-  res.send("Hello FutureLink");
-});
+app.set("view engine", "ejs");
+app.set("views", "src/views");
 
-app.get("/login", (req, res) => {
-  res.send("<h1>Hello Login<h1>");
-});
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static("public"));
+
+app.use(router);
 
 export default app;
