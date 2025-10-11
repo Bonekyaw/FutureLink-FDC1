@@ -1,4 +1,4 @@
-import { GalleryVerticalEnd } from "lucide-react";
+import { ShoppingBasket } from "lucide-react";
 
 import { SignUpForm } from "@/components/auth/signup-form";
 
@@ -8,9 +8,9 @@ export default function LoginPage() {
       <div className="flex w-full max-w-sm flex-col gap-6">
         <a href="#" className="flex items-center gap-2 self-center font-medium">
           <div className="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md">
-            <GalleryVerticalEnd className="size-4" />
+            <ShoppingBasket className="size-4" />
           </div>
-          Acme Inc.
+          Furniture Shop
         </a>
         <SignUpForm />
       </div>
