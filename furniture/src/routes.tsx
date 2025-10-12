@@ -7,11 +7,14 @@ import Product from "@/pages/product/Product";
 import Register from "@/pages/auth/Register";
 import AuthRootLayout from "@/components/auth/root-layout";
 import OtpPage from "@/pages/auth/Otp";
+import ConfirmPasswordPage from "@/pages/auth/Password";
+import ErrorPage from "./error";
 
 export const router = createBrowserRouter([
   {
     path: "/",
     Component: RootLayout,
+    ErrorBoundary: ErrorPage,
     children: [
       { index: true, Component: App },
       { path: "product", Component: Product },
@@ -24,6 +27,7 @@ export const router = createBrowserRouter([
     children: [
       { index: true, Component: Register },
       { path: "otp", Component: OtpPage },
+      { path: "password", Component: ConfirmPasswordPage },
     ],
   },
 ]);

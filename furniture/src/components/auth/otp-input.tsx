@@ -20,6 +20,7 @@ import {
   InputOTPSlot,
   InputOTPSeparator,
 } from "@/components/ui/input-otp";
+import { useNavigate } from "react-router";
 
 const FormSchema = z.object({
   pin: z.string().min(6, {
@@ -28,6 +29,8 @@ const FormSchema = z.object({
 });
 
 export function InputOTPForm() {
+  const navigate = useNavigate();
+
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -37,6 +40,7 @@ export function InputOTPForm() {
 
   function onSubmit(data: z.infer<typeof FormSchema>) {
     console.log("OTP input: ", data);
+    navigate("/register/password");
 
     // toast("You submitted the following values", {
     //   description: (
@@ -84,8 +88,13 @@ export function InputOTPForm() {
             </FormItem>
           )}
         />
-
-        <Button type="submit">Submit</Button>
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={form.formState.isSubmitting}
+        >
+          {form.formState.isSubmitting ? "Submitting..." : "Submit"}
+        </Button>
       </form>
     </Form>
   );
