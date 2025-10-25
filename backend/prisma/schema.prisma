@@ -13,3 +13,92 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Otp {
+  id            Int      @id @default(autoincrement())
+  phone         String   @unique @db.VarChar(15)
+  otp           String   @db.VarChar(6)
+  rememberToken String
+  verifyToken   String?
+  count         Int      @default(0) @db.SmallInt
+  errorCount    Int      @default(0) @db.SmallInt
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model User {
+  id              Int       @id @default(autoincrement())
+  phone           String    @unique @db.VarChar(15)
+  firstName       String?   @db.VarChar(52)
+  lastName        String?   @db.VarChar(52)
+  email           String?   @unique @db.VarChar(52)
+  password        String
+  role            Role      @default(USER)
+  status          Status    @default(ACTIVE)
+  lastLogin       DateTime?
+  errorLoginCount Int       @default(0) @db.SmallInt
+  randToken       String
+  image           String?
+  products        Product[]
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model Category {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique @db.VarChar(52)
+  products Product[]
+}
+
+model Type {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique @db.VarChar(52)
+  products Product[]
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(100)
+  description String   @db.Text
+  price       Decimal  @db.Decimal(10, 2)
+  discount    Decimal  @default(0) @db.Decimal(5, 2)
+  rating      Int      @default(3) @db.SmallInt
+  inventory   Int      @default(0)
+  status      Status   @default(ACTIVE)
+  categoryId  Int
+  typeId      Int
+  images      Image[]
+  users       User[]
+  tags        Tag[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  category Category @relation(fields: [categoryId], references: [id])
+  type     Type     @relation(fields: [typeId], references: [id])
+}
+
+model Image {
+  id        Int    @id @default(autoincrement())
+  url       String @db.VarChar(255)
+  productId Int
+
+  product Product @relation(fields: [productId], references: [id])
+}
+
+model Tag {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique @db.VarChar(52)
+  products Product[]
+}
+
+enum Role {
+  USER
+  ADMIN
+  PREMEIUM
+}
+
+enum Status {
+  INACTIVE
+  ACTIVE
+  FREEZE
+}
