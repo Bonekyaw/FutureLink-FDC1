@@ -42,6 +42,7 @@ model User {
   products        Product[]
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
+  orders          Order[]
 }
 
 model Category {
@@ -57,24 +58,57 @@ model Type {
 }
 
 model Product {
-  id          Int      @id @default(autoincrement())
-  name        String   @db.VarChar(100)
-  description String   @db.Text
-  price       Decimal  @db.Decimal(10, 2)
-  discount    Decimal  @default(0) @db.Decimal(5, 2)
-  rating      Int      @default(3) @db.SmallInt
-  inventory   Int      @default(0)
-  status      Status   @default(ACTIVE)
+  id          Int              @id @default(autoincrement())
+  name        String           @db.VarChar(100)
+  description String           @db.Text
+  price       Decimal          @db.Decimal(10, 2)
+  discount    Decimal          @default(0) @db.Decimal(5, 2)
+  rating      Int              @default(3) @db.SmallInt
+  inventory   Int              @default(0)
+  status      Status           @default(ACTIVE)
   categoryId  Int
   typeId      Int
   images      Image[]
   users       User[]
   tags        Tag[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  orders      OrderToProduct[]
 
   category Category @relation(fields: [categoryId], references: [id])
   type     Type     @relation(fields: [typeId], references: [id])
+}
+
+model Order {
+  id         Int              @id @default(autoincrement())
+  userId     Int
+  code       String           @unique @db.VarChar(20)
+  totalPrice Decimal          @db.Decimal(10, 2)
+  status     Payment          @default(PENDING)
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+  products   OrderToProduct[]
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+// OrderItem - Pivot table between Order and Product - Bridge table
+model OrderToProduct {
+  id        Int     @id @default(autoincrement())
+  orderId   Int
+  productId Int
+  quantity  Int     @default(1) @db.SmallInt
+  price     Decimal @db.Decimal(10, 2)
+
+  order   Order   @relation(fields: [orderId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+}
+
+enum Payment {
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELLED
 }
 
 model Image {
