@@ -7,3 +7,12 @@ export const findUserByPhone = async (phone: string) => {
     },
   });
 };
+
+export const updateUserById = async (id: number, data: any) => {
+  return await prisma.user.update({
+    where: {
+      id,
+    },
+    data,
+  });
+};

@@ -24,6 +24,8 @@ model Otp {
   errorCount    Int      @default(0) @db.SmallInt
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+
+  @@index([phone])
 }
 
 model User {
@@ -43,6 +45,8 @@ model User {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   orders          Order[]
+
+  @@index([phone])
 }
 
 model Category {
@@ -90,6 +94,8 @@ model Order {
   products   OrderToProduct[]
 
   user User @relation(fields: [userId], references: [id])
+
+  @@index([code])
 }
 
 // OrderItem - Pivot table between Order and Product - Bridge table
