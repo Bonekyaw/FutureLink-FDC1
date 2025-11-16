@@ -16,3 +16,24 @@ export const updateUserById = async (id: number, data: any) => {
     data,
   });
 };
+
+export const findOTPbyPhone = async (phone: string) => {
+  return await prisma.otp.findUnique({
+    where: {
+      phone,
+    },
+  });
+};
+
+export const createOTP = async (data: any) => {
+  return await prisma.otp.create({ data });
+};
+
+export const updateOTP = async (id: number, data: any) => {
+  return await prisma.otp.update({
+    where: {
+      id,
+    },
+    data,
+  });
+};

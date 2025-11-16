@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { body, validationResult } from "express-validator";
 import { createError } from "../../utils/error";
 import { errorCode } from "../../config";
-import { loginService } from "../../services/authService";
+import { loginService, registerService } from "../../services/authService";
 
 export const login = [
   body("phone", "Invalid Phone number")
@@ -47,6 +47,32 @@ export const login = [
           message: "Successfully Logged In.",
           userId,
         });
+    } catch (error) {
+      next(error);
+    }
+  },
+];
+
+export const register = [
+  body("phone", "Invalid Phone number")
+    .trim()
+    .notEmpty()
+    .matches(/^\d+$/)
+    .isLength({ min: 5, max: 12 }),
+  async (req: Request, res: Response, next: NextFunction) => {
+    const errors = validationResult(req).array({ onlyFirstError: true });
+    if (errors.length > 0) {
+      return next(createError(errors[0].msg, 400, errorCode.invalid));
+    }
+
+    try {
+      const phone = req.body.phone;
+      const { phone_number, token } = await registerService(phone);
+      res.status(200).json({
+        message: "We are sending OTP to 09" + phone_number,
+        phone: phone_number,
+        token,
+      });
     } catch (error) {
       next(error);
     }

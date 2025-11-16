@@ -1,10 +1,20 @@
-import { NextFunction } from "express";
 import { errorCode } from "../config";
-import { findUserByPhone, updateUserById } from "../models/authModel";
-import { checkUserIfNotExist } from "../utils/check";
+import {
+  createOTP,
+  findOTPbyPhone,
+  findUserByPhone,
+  updateOTP,
+  updateUserById,
+} from "../models/authModel";
+import {
+  checkOtpErrorIfSameDay,
+  checkUserIfExist,
+  checkUserIfNotExist,
+} from "../utils/check";
 import { createError } from "../utils/error";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { generateOTP, generateToken } from "../utils/generate";
 
 export const loginService = async (phone: string, password: string) => {
   if (phone.startsWith("09")) {
@@ -58,4 +68,62 @@ export const loginService = async (phone: string, password: string) => {
   });
 
   return { accessToken, refreshToken, userId: user!.id };
+};
+
+export const registerService = async (phone: string) => {
+  if (phone.startsWith("09")) {
+    phone = phone.substring(2); // Remove leading '09'
+  }
+
+  const user = await findUserByPhone(phone);
+  checkUserIfExist(user);
+
+  // Sending OTP Logic here
+  //const otp = generateOTP();
+  const otp = "123456";
+  // Call api to send OTP
+
+  const salt = await bcrypt.genSalt(10);
+  const hashedOTP = await bcrypt.hash(otp.toString(), salt);
+  const token = generateToken();
+
+  const otpRow = await findOTPbyPhone(phone);
+  let result;
+  if (!otpRow) {
+    result = await createOTP({
+      phone,
+      otp: hashedOTP,
+      rememberToken: token,
+      count: 1,
+    });
+  } else {
+    const lastRequest = new Date(otpRow.updatedAt).toLocaleDateString();
+    const isSameDay = lastRequest === new Date().toLocaleDateString();
+    checkOtpErrorIfSameDay(isSameDay, otpRow.errorCount);
+
+    if (!isSameDay) {
+      result = await updateOTP(otpRow.id, {
+        otp: hashedOTP,
+        rememberToken: token,
+        count: 1,
+        errorCount: 0,
+      });
+    } else {
+      if (otpRow.count >= 3) {
+        throw createError(
+          "OTP is allowed 3 times per day. Please try again tomorrow.",
+          405,
+          errorCode.overLimit
+        );
+      } else {
+        result = await updateOTP(otpRow.id, {
+          otp: hashedOTP,
+          rememberToken: token,
+          count: { increment: 1 },
+        });
+      }
+    }
+  }
+
+  return { phone_number: result.phone, token: result.rememberToken };
 };
