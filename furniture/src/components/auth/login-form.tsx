@@ -48,9 +48,31 @@ export function LoginForm({
   });
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    console.log(data);
-    navigate("/");
+    // await new Promise((resolve) => setTimeout(resolve, 2000));
+    // console.log(data);
+    try {
+      const response = await fetch(import.meta.env.VITE_API_URL + "/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          phone: data.phone,
+          password: data.password,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const result = await response.json();
+      console.log("API response", result);
+
+      alert("Login successful!");
+      navigate("/");
+    } catch (error) {
+      console.log("API error", error);
+    }
   }
 
   return (
