@@ -1,5 +1,6 @@
 import express, { Request, Response, NextFunction } from "express";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 import router from "./routes";
 
 const app = express();
@@ -10,7 +11,8 @@ const app = express();
 app
   .use(express.urlencoded({ extended: true }))
   .use(express.json())
-  .use(cookieParser());
+  .use(cookieParser())
+  .use(cors());
 
 app.use(express.static("public"));
 

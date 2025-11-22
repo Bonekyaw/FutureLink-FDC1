@@ -9,6 +9,9 @@
     // See also https://aka.ms/tsconfig/module
     "module": "commonjs",
     "target": "esnext",
+    // "module": "ESNext",
+    // "moduleResolution": "node",
+    // "target": "esnext",
     // "types": [],
     // For nodejs:
     // "lib": ["esnext"],
