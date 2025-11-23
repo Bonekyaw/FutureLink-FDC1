@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Link, useNavigate } from "react-router";
+import { Link, useSubmit, useActionData, useNavigation } from "react-router";
 
 import {
   Form,
@@ -37,7 +37,12 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const navigate = useNavigate();
+  const submit = useSubmit();
+  const navigation = useNavigation();
+  // Objects are not valid as a React child (found: object with keys {message, error}). If you meant to render a collection of children, use an array instead.
+  const actionData = useActionData() as
+    | { error?: string | { message: string; error: string } }
+    | undefined;
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -47,32 +52,8 @@ export function LoginForm({
     },
   });
 
-  async function onSubmit(data: z.infer<typeof FormSchema>) {
-    // await new Promise((resolve) => setTimeout(resolve, 2000));
-    // console.log(data);
-    try {
-      const response = await fetch(import.meta.env.VITE_API_URL + "/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          phone: data.phone,
-          password: data.password,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-      const result = await response.json();
-      console.log("API response", result);
-
-      alert("Login successful!");
-      navigate("/");
-    } catch (error) {
-      console.log("API error", error);
-    }
+  function onSubmit(data: z.infer<typeof FormSchema>) {
+    submit(data, { method: "post", action: "/login" });
   }
 
   return (
@@ -144,12 +125,23 @@ export function LoginForm({
                       </FormItem>
                     )}
                   />
+                  {actionData?.error && (
+                    <div className="text-sm text-red-400">
+                      {typeof actionData.error === "string"
+                        ? actionData.error
+                        : (actionData.error?.message ??
+                          JSON.stringify(actionData.error))}
+                    </div>
+                  )}
                   <Button
                     type="submit"
                     className="w-full"
-                    disabled={form.formState.isSubmitting}
+                    // disabled={form.formState.isSubmitting}
+                    disabled={navigation.state === "submitting"}
                   >
-                    {form.formState.isSubmitting ? "Logging in..." : "Login"}
+                    {navigation.state === "submitting"
+                      ? "Logging in..."
+                      : "Login"}
                   </Button>
                 </form>
               </Form>

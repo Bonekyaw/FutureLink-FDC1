@@ -9,6 +9,7 @@ import AuthRootLayout from "@/components/auth/root-layout";
 import OtpPage from "@/pages/auth/Otp";
 import ConfirmPasswordPage from "@/pages/auth/Password";
 import ErrorPage from "./error";
+import { loginAction } from "@/router/actions";
 
 export const router = createBrowserRouter([
   {
@@ -20,7 +21,7 @@ export const router = createBrowserRouter([
       { path: "product", Component: Product },
     ],
   },
-  { path: "/login", Component: Login },
+  { path: "/login", Component: Login, action: loginAction },
   {
     path: "/register",
     Component: AuthRootLayout,
