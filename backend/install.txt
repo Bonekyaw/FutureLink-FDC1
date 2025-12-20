@@ -3,4 +3,5 @@
 3. npm i typescript ts-node nodemon @types/node @types/bcrypt --save-dev
 4. npm i @types/express @types/cors @types/morgan --save-dev
 5. npx tsc --init
-6. 
+6. npm i multer
+7. npm i @types/multer -D
