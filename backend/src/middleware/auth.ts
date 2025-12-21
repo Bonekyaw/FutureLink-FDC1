@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { createError } from "../utils/error";
 import { errorCode } from "../config";
 import jwt from "jsonwebtoken";
-import { findUserById, updateUserById } from "../models/authModel";
+import { findUserById, updateUserById } from "../models/userRepository";
 
 interface AuthenticatedRequest extends Request {
   userId?: number;

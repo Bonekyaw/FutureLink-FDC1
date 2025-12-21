@@ -5,7 +5,7 @@ import {
   findUserByPhone,
   updateOTP,
   updateUserById,
-} from "../models/authModel";
+} from "../models/userRepository";
 import {
   checkOtpErrorIfSameDay,
   checkUserIfExist,
