@@ -5,3 +5,7 @@
 5. npx tsc --init
 6. npm i multer express-rate-limit helmet compression
 7. npm i @types/multer @types/compression -D
+
+Prisma 6.19
+npm install prisma@6.19.0 -D
+npm install @prisma/client@6.19.0 @prisma/extension-accelerate@2.0.2
