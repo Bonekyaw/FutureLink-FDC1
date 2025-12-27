@@ -3,7 +3,7 @@
 3. npm i typescript ts-node nodemon @types/node @types/bcrypt --save-dev
 4. npm i @types/express @types/cors @types/morgan --save-dev
 5. npx tsc --init
-6. npm i multer express-rate-limit helmet compression
+6. npm i multer express-rate-limit helmet compression sharp
 7. npm i @types/multer @types/compression -D
 
 Prisma 6.19
