@@ -28,6 +28,6 @@ dist-ssr
 /generated/prisma
 
 .env
-.env.*
+.env.local
 
 uploads/

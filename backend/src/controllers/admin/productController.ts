@@ -1,18 +1,45 @@
 import { body, validationResult } from "express-validator";
 import { Request, Response, NextFunction } from "express";
+import path from "path";
+import { unlink } from "node:fs/promises";
+import { unlink as fsUnlink } from "fs/promises";
+
 import { createError } from "../../utils/error";
 import { errorCode } from "../../config";
-import path from "path";
-import { unlink } from "fs/promises";
 import { findUserById } from "../../models/userRepository";
-import sharp from "sharp";
+import { productCreateService } from "../../services/productService";
 
 interface AuthenticatedRequest extends Request {
   userId?: number;
   files?: any;
 }
 
-const removeFiles = async (originalFileNames: string[]) => {
+async function safeUnlink(
+  filePath: string,
+  retries = 3,
+  delayMs = 100
+): Promise<void> {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      await fsUnlink(filePath);
+      return;
+    } catch (err: any) {
+      // Only retry on EPERM or EBUSY (Windows file-lock errors)
+      if ((err.code === "EPERM" || err.code === "EBUSY") && attempt < retries) {
+        // wait a bit, then retry
+        await new Promise((res) => setTimeout(res, delayMs));
+        continue;
+      }
+      // rethrow for any other error, or if out of retries
+      throw err;
+    }
+  }
+}
+
+const removeFiles = async (
+  originalFileNames: string[],
+  optimizedFiles: string[] | null
+) => {
   // Implement file removal logic here, e.g., using fs.unlink
   try {
     for (const originalFileName of originalFileNames) {
@@ -22,7 +49,20 @@ const removeFiles = async (originalFileNames: string[]) => {
         "/uploads/images/" + originalFileName
       );
       await unlink(originalFilePath);
-      console.log(`Deleted file: ${originalFilePath}`);
+      // console.log(`Deleted file: ${originalFilePath}`);
+    }
+
+    if (optimizedFiles) {
+      for (const optimizedFile of optimizedFiles) {
+        const optimizedFilePath = path.join(
+          __dirname,
+          "../../..",
+          "/uploads/optimize",
+          optimizedFile
+        );
+        // await safeUnlink(optimizedFilePath);  // Use this For windows error - 'EPERM' or 'EBUSY'
+        await unlink(optimizedFilePath);
+      }
     }
   } catch (error) {
     console.error(error);
@@ -36,7 +76,7 @@ export const createProduct = [
     .isFloat({ gt: 0 })
     .isDecimal({ decimal_digits: "1,2" }),
   body("discount", "Discount must be a number")
-    .isFloat({ gt: 0 })
+    .isFloat({ min: 0 })
     .isDecimal({ decimal_digits: "1,2" }),
   body("inventory", "Stock must be an integer").isInt({ gt: -1 }),
   body("category", "Category is required").trim().notEmpty().escape(),
@@ -53,7 +93,7 @@ export const createProduct = [
       if (req.files && req.files.length > 0) {
         // Delete uploaded files if validation fails
         const originalFiles = req.files.map((file: any) => file.filename);
-        await removeFiles(originalFiles);
+        await removeFiles(originalFiles, null);
       }
       return next(createError(errors[0].msg, 400, errorCode.invalid));
     }
@@ -68,6 +108,12 @@ export const createProduct = [
     const userId = req.userId;
     const user = await findUserById(userId!);
     if (user?.role !== "ADMIN") {
+      if (req.files && req.files.length > 0) {
+        // Delete uploaded files if validation fails
+        const originalFiles = req.files.map((file: any) => file.filename);
+        await removeFiles(originalFiles, null);
+      }
+
       return next(
         createError("This action is not allowed", 403, errorCode.unauthorised)
       );
@@ -85,30 +131,21 @@ export const createProduct = [
     } = req.body;
     const files = req.files;
 
-    // Optimize file
-    await Promise.all(
-      files.map(async (file: any) => {
-        // console.log("Uploaded file:", file.filename);
-        const splitFileName = file.filename.split(".")[0];
-        const optimizeFilePath = path.join(
-          __dirname,
-          "../../..",
-          "/uploads/optimize/" + splitFileName + ".webp"
-        );
+    const productId = await productCreateService({
+      name,
+      description,
+      price,
+      discount,
+      inventory,
+      category,
+      type,
+      tags,
+      files,
+    });
 
-        try {
-          return await sharp(file.path)
-            .resize(835, 577)
-            .webp({ quality: 80 })
-            .toFile(optimizeFilePath);
-        } catch (error) {
-          console.log(error);
-        }
-      })
-    );
-
-    const originalFileNames = files.map((file: any) => ({
-      url: file.filename,
-    }));
+    res.status(201).json({
+      message: "Successfully created a new product.",
+      productId,
+    });
   },
 ];
