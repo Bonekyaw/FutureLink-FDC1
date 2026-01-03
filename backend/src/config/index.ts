@@ -11,4 +11,5 @@ export const errorCode = {
   unauthorised: "Error_Unauthorised",
   maintenance: "Error_Maintenance",
   serverError: "Server error occurs.",
+  badRequest: "Bad Request",
 };

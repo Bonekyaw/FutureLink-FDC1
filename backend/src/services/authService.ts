@@ -1,6 +1,7 @@
 import { errorCode } from "../config";
 import {
   createOTP,
+  createUser,
   findOTPbyPhone,
   findUserByPhone,
   updateOTP,
@@ -15,6 +16,7 @@ import { createError } from "../utils/error";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { generateOTP, generateToken } from "../utils/generate";
+import moment from "moment";
 
 export const loginService = async (phone: string, password: string) => {
   if (phone.startsWith("09")) {
@@ -126,4 +128,129 @@ export const registerService = async (phone: string) => {
   }
 
   return { phone_number: result.phone, token: result.rememberToken };
+};
+
+export const verifyOtpService = async (
+  phone: string,
+  otp: string,
+  token: string
+) => {
+  const user = await findUserByPhone(phone);
+  checkUserIfExist(user);
+
+  const otpRow = await findOTPbyPhone(phone);
+  checkUserIfNotExist(otpRow);
+
+  const lastRequest = new Date(otpRow!.updatedAt).toLocaleDateString();
+  const isSameDay = new Date().toLocaleDateString() === lastRequest;
+  checkOtpErrorIfSameDay(isSameDay, otpRow!.errorCount);
+
+  // If Token is wrong
+  if (otpRow!.rememberToken !== token) {
+    await updateOTP(otpRow!.id, {
+      errorCount: 5,
+    });
+
+    throw createError("Invalid token", 400, errorCode.badRequest);
+  }
+  // If OTP is expired
+  const isOtpExpired = moment().diff(otpRow?.updatedAt, "minutes") > 3;
+  if (isOtpExpired) {
+    throw createError("OTP has expired", 403, errorCode.otpExpired);
+  }
+
+  // If OTP is wrong
+  const isOtpValid = await bcrypt.compare(otp, otpRow!.otp);
+  if (!isOtpValid) {
+    if (!isSameDay) {
+      await updateOTP(otpRow!.id, {
+        errorCount: 1,
+      });
+    } else {
+      await updateOTP(otpRow!.id, {
+        errorCount: { increment: 1 },
+      });
+    }
+    throw createError("Invalid OTP", 400, errorCode.badRequest);
+  }
+
+  // All are OK
+  const verifyToken = generateToken();
+  await updateOTP(otpRow!.id, {
+    verifyToken,
+    errorCount: 0,
+  });
+
+  return verifyToken;
+};
+
+export const confirmPasswordService = async (
+  phone: string,
+  password: string,
+  token: string
+) => {
+  const user = await findUserByPhone(phone);
+  checkUserIfExist(user);
+
+  const otpRow = await findOTPbyPhone(phone);
+  checkUserIfNotExist(otpRow);
+
+  if (otpRow!.errorCount >= 5) {
+    throw createError(
+      "This request is blocked due to suspicious activity",
+      400,
+      errorCode.attack
+    );
+  }
+
+  // If token is wrong
+  if (otpRow!.verifyToken !== token) {
+    await updateOTP(otpRow!.id, {
+      errorCount: 5,
+    });
+    throw createError(
+      "This request is blocked due to suspicious activity",
+      400,
+      errorCode.attack
+    );
+  }
+
+  // Request is expired
+  const isRequestExpired = moment().diff(otpRow?.updatedAt, "minutes") > 10;
+  if (isRequestExpired) {
+    throw createError(
+      "This request is expired. Please initiate the process again.",
+      400,
+      errorCode.badRequest
+    );
+  }
+
+  // All are OK - Set password
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(password, salt);
+  const randToken = "I will replace this later"; // Placeholder for randToken
+
+  const newUser = await createUser({
+    phone,
+    password: hashedPassword,
+    randToken,
+  });
+
+  const accessToken = jwt.sign(
+    { id: newUser!.id },
+    process.env.ACCESS_TOKEN_SECRET!,
+    { expiresIn: 60 * 10 } // 10 mins
+  );
+
+  const refreshToken = jwt.sign(
+    { id: newUser!.id, phone: newUser!.phone },
+    process.env.REFRESH_TOKEN_SECRET!,
+    { expiresIn: "30d" } // 30 days
+  );
+
+  await updateUserById(newUser!.id, {
+    randToken: refreshToken,
+  });
+
+  return { accessToken, refreshToken, userId: newUser!.id };
 };
