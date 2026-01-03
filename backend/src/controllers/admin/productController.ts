@@ -13,7 +13,7 @@ interface AuthenticatedRequest extends Request {
   userId?: number;
   files?: any;
 }
-
+// For windows Users
 async function safeUnlink(
   filePath: string,
   retries = 3,
@@ -49,6 +49,7 @@ const removeFiles = async (
         "/uploads/images/" + originalFileName
       );
       await unlink(originalFilePath);
+      // await safeUnlink(originalFilePath);
       // console.log(`Deleted file: ${originalFilePath}`);
     }
 
