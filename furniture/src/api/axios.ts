@@ -13,6 +13,7 @@ api.interceptors.response.use(
   (error) => {
     if (error.response && error.response.status === 401) {
       // Handle unauthorized error (e.g., redirect to login)
+
       window.location.href = "/login";
     }
     return Promise.reject(error);
@@ -24,6 +25,7 @@ export const authApi = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true,
 });
 
 export default api;
