@@ -1,10 +1,16 @@
 import { Outlet } from "react-router";
 
+import NavigationHeader from "@/components/layout/header";
+import FooterNavigation from "@/components/layout/footer";
+
 function RootLayout() {
   return (
-    <div>
-      <h1 className="text-5xl font-bold text-red-400">Header Navigation</h1>
-      <Outlet />
+    <div className="flex min-h-screen flex-col bg-gray-50">
+      <NavigationHeader />
+      <main className="flex-1">
+        <Outlet />
+      </main>
+      <FooterNavigation />
     </div>
   );
 }

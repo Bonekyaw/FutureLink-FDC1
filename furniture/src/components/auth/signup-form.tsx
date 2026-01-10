@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useNavigate } from "react-router";
+import { useSubmit, useActionData, useNavigation, Link } from "react-router";
 
 import {
   Form,
@@ -38,7 +38,10 @@ export function SignUpForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
+  const submit = useSubmit();
+  const actionData = useActionData() as { error?: string } | undefined;
+  const navigation = useNavigation();
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -49,7 +52,8 @@ export function SignUpForm({
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     console.log(data);
-    navigate("/register/otp");
+    // navigate("/register/otp");
+    submit(data, { method: "post", action: "." });
   }
 
   return (
@@ -116,27 +120,37 @@ export function SignUpForm({
                     </FormItem>
                   )}
                 />
+                {actionData?.error && (
+                  <p className="text-center text-sm text-red-600">
+                    {actionData.error}
+                  </p>
+                )}
                 <Button
                   type="submit"
                   className="w-full"
-                  disabled={form.formState.isSubmitting}
+                  // disabled={form.formState.isSubmitting}
+                  disabled={navigation.state === "submitting"}
                 >
-                  {form.formState.isSubmitting ? "Registering..." : "Register"}
+                  {/* {form.formState.isSubmitting ? "Registering..." : "Register"} */}
+                  {navigation.state === "submitting"
+                    ? "Registering..."
+                    : "Register"}
                 </Button>
               </form>
             </Form>
             <div className="text-center text-sm">
               Don&apos;t have an account?{" "}
-              <a href="#" className="underline underline-offset-4">
-                Sign up
-              </a>
+              <Link to="/login" className="underline underline-offset-4">
+                Sign In
+              </Link>
             </div>
           </div>
         </CardContent>
       </Card>
       <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
-        and <a href="#">Privacy Policy</a>.
+        By clicking continue, you agree to our{" "}
+        <Link to="#">Terms of Service</Link> and{" "}
+        <Link to="#">Privacy Policy</Link>.
       </div>
     </div>
   );
