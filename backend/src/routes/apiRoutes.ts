@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  authCheck,
   confirmPassword,
   login,
   register,
@@ -21,5 +22,7 @@ router.post("/register/password", confirmPassword);
 
 router.get("/products", auth, getProductsByPagination); // Cursor-based Pagination
 router.get("/filter-type", auth, getCategoryType);
+
+router.get("/auth-check", auth, authCheck);
 
 export default router;
